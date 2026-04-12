@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Harmonium — by Biswajit Maji</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0f0f11;
+  --panel:     #17171a;
+  --card:      #1e1e22;
+  --card2:     #252529;
+  --line:      rgba(255,255,255,0.07);
+  --line2:     rgba(255,255,255,0.04);
+  --ink:       #f0f0f2;
+  --ink2:      #9090a0;
+  --ink3:      #52525f;
+  --accent:    #f5a623;
+  --accent2:   #ffc85a;
+  --accent-bg: rgba(245,166,35,0.12);
+  --accent-line: rgba(245,166,35,0.3);
+  --green:     #22c77a;
+  --green-bg:  rgba(34,199,122,0.12);
+  --red:       #f0504a;
+  --red-bg:    rgba(240,80,74,0.12);
+  --blue:      #4a90f0;
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.5);
+}
+.light-mode {
+  --bg:#f0f0f4; --panel:#ffffff; --card:#f7f7fb; --card2:#ededf3;
+  --line:rgba(0,0,0,0.08); --line2:rgba(0,0,0,0.04);
+  --ink:#111118; --ink2:#60607a; --ink3:#a0a0b8;
+  --accent-bg:rgba(245,166,35,0.1); --accent-line:rgba(245,166,35,0.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+/* LOAD SCREEN */
+#load-screen{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.load-badge{width:78px;height:78px;background:linear-gradient(135deg,#2a2a30,#1a1a1f);border:1px solid var(--line);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+.load-badge::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-bg),transparent);}
+.load-badge svg{width:34px;height:34px;position:relative;z-index:1;}
+.load-text{text-align:center;}
+.load-text h2{font-size:2.2rem;font-weight:800;letter-spacing:-0.03em;color:var(--ink);line-height:1.1;}
+.load-text h2 span{color:var(--accent);}
+.load-text p{font-size:0.95rem;color:var(--ink3);margin-top:5px;}
+#load-btn{background:var(--accent);color:#0f0f11;border:none;padding:13px 42px;border-radius:40px;font-size:1rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.02em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(245,166,35,0.3);}
+#load-btn:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 28px rgba(245,166,35,0.45);}
+#load-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+#load-status{font-size:0.75rem;color:var(--ink3);min-height:18px;text-align:center;letter-spacing:0.04em;}
+
+/* TOPNAV */
+.topnav{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:10;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:10px;margin-right:6px;flex-shrink:0;}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,#c8862a,#f5a623);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 10px rgba(245,166,35,0.3);}
+.brand-icon svg{width:18px;height:18px;}
+.brand-text h1{font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--ink);}
+.brand-text p{font-size:0.8rem;color:var(--ink3);margin-top:2px;}
+.nav-pills{display:flex;align-items:center;gap:5px;margin-left:auto;flex-wrap:wrap;}
+.nav-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;font-size:0.7rem;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink2);white-space:nowrap;}
+.nav-pill.hi{background:var(--accent-bg);border-color:var(--accent-line);color:var(--accent);}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.7;}
+.theme-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:0.7rem;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;}
+.theme-btn:hover{background:var(--card2);color:var(--ink);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;gap:0;padding:18px;max-width:1080px;width:100%;margin:0 auto;}
+
+/* KBD CARD */
+.kbd-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);padding:22px 18px 18px;margin-bottom:14px;box-shadow:var(--shadow-md);}
+.kbd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.kbd-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);}
+.note-row{display:flex;align-items:center;gap:8px;}
+.note-badge{background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:var(--r-sm);padding:4px 12px;font-size:0.88rem;font-weight:800;color:var(--accent);min-width:68px;text-align:center;transition:all 0.1s;}
+.note-badge.on{background:rgba(245,166,35,0.22);box-shadow:0 0 14px rgba(245,166,35,0.18);}
+.sargam-badge{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:4px 12px;font-size:0.78rem;font-weight:700;color:var(--ink2);min-width:56px;text-align:center;}
+.kbd-btns{display:flex;gap:6px;}
+.abtn{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r-sm);font-size:0.7rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.04em;cursor:pointer;transition:all 0.15s;border:1px solid;}
+.abtn-rec{background:var(--red-bg);border-color:rgba(240,80,74,0.3);color:var(--red);}
+.abtn-rec:hover{background:rgba(240,80,74,0.2);}
+.abtn-rec.on{background:rgba(240,80,74,0.22);border-color:var(--red);animation:recpulse 0.9s ease-in-out infinite;}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 rgba(240,80,74,0);}50%{box-shadow:0 0 14px rgba(240,80,74,0.4);}}
+.rec-dot{width:7px;height:7px;border-radius:50%;background:var(--red);}
+.abtn-drone{background:var(--card);border-color:var(--line);color:var(--ink2);}
+.abtn-drone:hover{background:var(--card2);color:var(--ink);}
+.abtn-drone.on{background:var(--green-bg);border-color:rgba(34,199,122,0.4);color:var(--green);}
+
+/* KEYBOARD */
+.keyboard-wrap{overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;}
+.keyboard-wrap::-webkit-scrollbar{height:4px;}
+.keyboard-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+.keyboard{position:relative;display:flex;height:182px;width:max-content;margin:0 auto;gap:3px;}
+.wk{width:46px;height:182px;background:#f8f6f2;border:1px solid #d0c8bc;border-bottom:2px solid #b8b0a4;border-radius:0 0 10px 10px;cursor:pointer;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:10px;transition:background 55ms,transform 55ms,box-shadow 55ms;user-select:none;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.95);}
+.light-mode .wk{background:#fff;border-color:#ccc8c0;border-bottom-color:#aaa090;}
+.wk:hover{background:#fff4e0;transform:translateY(1px);box-shadow:0 1px 6px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.9);}
+.wk.active{background:linear-gradient(180deg,#ffe0a0,#ffcc60);transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(0,0,0,0.12),0 1px 3px rgba(0,0,0,0.2);}
+.wk .nl{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:0.02em;line-height:1;}
+.wk.active .nl{color:#7a3c00;}
+.wk .kl{font-size:11px;font-weight:600;color:#888;margin-top:4px;background:rgba(0,0,0,0.05);padding:2px 5px;border-radius:4px;}
+.bk{width:30px;height:114px;background:linear-gradient(175deg,#252528 0%,#111114 100%);border:1px solid #0a0a0c;border-radius:0 0 8px 8px;cursor:pointer;position:absolute;top:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:8px;transition:background 55ms,transform 55ms;user-select:none;box-shadow:0 5px 14px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);}
+.bk:hover{background:linear-gradient(175deg,#3a3020 0%,#28200f 100%);transform:translateY(1px);}
+.bk.active{background:linear-gradient(175deg,#6a4c18 0%,#4a3410 100%);transform:translateY(3px);box-shadow:inset 0 2px 6px rgba(0,0,0,0.4),0 2px 6px rgba(0,0,0,0.4);}
+.bk .kl{font-size:9px;font-weight:700;color:rgba(245,166,35,0.5);}
+.bk.active .kl{color:var(--accent);}
+
+/* HINT BAR */
+.hint-bar{margin-top:12px;padding:9px 12px;background:var(--card);border:1px solid var(--line2);border-radius:var(--r-sm);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.hint-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--ink3);}
+.hint-key{background:var(--card2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:0.66rem;font-weight:700;color:var(--ink2);font-family:monospace;}
+.hint-sep{width:1px;height:12px;background:var(--line);margin:0 3px;}
+
+/* CONTROLS */
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:14px;}
+.ctrl-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:13px 13px 13px;box-shadow:var(--shadow-sm);transition:border-color 0.2s;display:flex;flex-direction:column;}
+.ctrl-card:hover{border-color:rgba(255,255,255,0.11);}
+.ctrl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ctrl-lbl{display:flex;align-items:center;gap:6px;}
+.ctrl-ico{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ic-o{background:rgba(245,166,35,0.15);}
+.ic-t{background:rgba(34,199,122,0.12);}
+.ic-b{background:rgba(74,144,240,0.12);}
+.ic-p{background:rgba(160,100,240,0.12);}
+.ic-pk{background:rgba(240,80,140,0.12);}
+.ctrl-name{font-size:0.8rem;font-weight:700;color:var(--ink);}
+.ctrl-shortcut{font-size:0.62rem;color:var(--ink3);font-family:monospace;background:var(--card);border:1px solid var(--line2);padding:2px 5px;border-radius:4px;white-space:nowrap;}
+.ctrl-big{font-size:1.75rem;font-weight:800;letter-spacing:-0.04em;line-height:1;color:var(--accent);margin-bottom:2px;}
+.ctrl-big sup{font-size:0.85rem;opacity:0.6;font-weight:700;}
+.ctrl-sub{font-size:0.65rem;color:var(--ink3);font-weight:500;}
+.range-wrap{margin-top:10px;}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--card2);border-radius:4px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border:2px solid var(--panel);border-radius:50%;cursor:pointer;box-shadow:0 0 0 1px var(--accent-line),0 2px 8px rgba(245,166,35,0.35);transition:box-shadow 0.15s;}
+input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 3px var(--accent-line),0 2px 12px rgba(245,166,35,0.55);}
+.stepper{display:flex;align-items:center;gap:6px;margin-top:10px;}
+.stp-btn{width:26px;height:26px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--ink2);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0;}
+.stp-btn:hover{background:var(--card2);color:var(--ink);border-color:rgba(255,255,255,0.12);}
+.stp-btn:active{transform:scale(0.92);}
+.stp-val{flex:1;text-align:center;font-size:1rem;font-weight:800;letter-spacing:-0.02em;color:var(--ink);}
+
+/* RECORDINGS */
+#recordings-section{margin-bottom:10px;}
+.rec-hdr{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;padding:0 2px;}
+.rec-item{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px;margin-bottom:7px;transition:border-color 0.15s;}
+.rec-item:hover{border-color:rgba(255,255,255,0.12);}
+.rec-play-btn{width:32px;height:32px;background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:50%;color:var(--accent);font-size:11px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rec-play-btn:hover{background:rgba(245,166,35,0.2);box-shadow:0 0 12px rgba(245,166,35,0.22);}
+.rec-name{font-size:0.78rem;font-weight:600;color:var(--ink);min-width:95px;flex-shrink:0;}
+.rec-pw{flex:1;min-width:80px;}
+.progress-bar-bg{height:4px;background:var(--card2);border-radius:4px;overflow:hidden;cursor:pointer;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.1s linear;border-radius:4px;}
+.rec-time{font-size:0.66rem;color:var(--ink3);font-variant-numeric:tabular-nums;font-weight:600;margin-top:4px;text-align:right;}
+.rec-dl-btn{width:30px;height:30px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);color:var(--ink3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.rec-dl-btn:hover{background:var(--card2);color:var(--ink);}
+
+/* FOOTER */
+.footer{text-align:center;padding:18px;font-size:0.8rem;color:var(--ink3);letter-spacing:0.06em;border-top:1px solid var(--line2);}
+
+/* MIDI PERMISSION POPUP */
+.midi-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;backdrop-filter:blur(3px);animation:overlayIn 0.2s ease;}
+@keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
+.midi-popup{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 4px 16px rgba(0,0,0,0.4);animation:popupIn 0.25s cubic-bezier(0.34,1.3,0.64,1);}
+@keyframes popupIn{from{opacity:0;transform:translateY(-14px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+.midi-popup-top{display:flex;align-items:center;gap:8px;padding:9px 14px 9px 14px;background:var(--card);border-radius:16px 16px 0 0;border-bottom:1px solid var(--line2);}
+.midi-popup-tab{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:600;color:var(--ink2);padding:4px 10px;background:var(--card2);border-radius:6px;border:1px solid var(--line);}
+.midi-popup-tab svg{width:13px;height:13px;opacity:0.7;}
+.midi-popup-body{padding:18px 18px 16px;}
+.midi-popup-title{font-size:0.95rem;font-weight:700;color:var(--ink);line-height:1.35;margin-bottom:14px;letter-spacing:-0.01em;}
+.midi-popup-title span{color:var(--accent);}
+.midi-perm-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;}
+.midi-perm-icon{width:30px;height:30px;background:var(--blue-bg,rgba(74,144,240,0.12));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.midi-perm-icon svg{width:15px;height:15px;}
+.midi-perm-text{font-size:0.78rem;font-weight:600;color:var(--ink);line-height:1.3;}
+.midi-remember{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+.midi-remember-lbl{font-size:0.72rem;color:var(--ink2);font-weight:500;}
+.midi-remember-sel{appearance:none;-webkit-appearance:none;background:var(--card2);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:0.72rem;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;padding:5px 26px 5px 9px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239090a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+.midi-popup-btns{display:flex;gap:8px;}
+.midi-btn{flex:1;padding:8px 0;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all 0.15s;border:1px solid;}
+.midi-btn-allow{background:var(--accent);color:#0f0f11;border-color:var(--accent);box-shadow:0 2px 12px rgba(245,166,35,0.3);}
+.midi-btn-allow:hover{background:var(--accent2);box-shadow:0 4px 18px rgba(245,166,35,0.45);}
+.midi-btn-block{background:var(--card2);color:var(--ink2);border-color:var(--line);}
+.midi-btn-block:hover{background:var(--card);color:var(--ink);}
+.midi-popup-footer{padding:10px 18px 13px;font-size:0.68rem;color:var(--ink3);line-height:1.6;border-top:1px solid var(--line2);}
+.midi-popup-footer a{color:var(--blue,#4a90f0);text-decoration:none;}
+.midi-popup-footer a:hover{text-decoration:underline;}
+.midi-close-btn{margin-left:auto;width:22px;height:22px;background:var(--card2);border:none;border-radius:50%;color:var(--ink3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;line-height:1;padding-bottom:1px;}
+.midi-close-btn:hover{background:var(--red-bg);color:var(--red);}
+
+/* MIDI STATUS CARD */
+.midi-status-badge{display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:0.65rem;font-weight:700;border:1px solid;white-space:nowrap;}
+.midi-status-badge.allowed{background:var(--green-bg);border-color:rgba(34,199,122,0.35);color:var(--green);}
+.midi-status-badge.blocked{background:var(--red-bg);border-color:rgba(240,80,74,0.35);color:var(--red);}
+.midi-status-badge.idle{background:var(--card);border-color:var(--line);color:var(--ink3);}
+.midi-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.midi-devices-list{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
+.midi-device-item{display:flex;align-items:center;gap:6px;padding:5px 7px;background:var(--card);border:1px solid var(--line2);border-radius:6px;font-size:0.68rem;color:var(--ink2);}
+.midi-device-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 5px rgba(34,199,122,0.5);}
+.midi-request-btn{margin-top:auto;padding-top:10px;width:100%;padding:7px 0;background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:7px;color:var(--accent);font-size:0.7rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
+.midi-request-btn:hover{background:rgba(245,166,35,0.2);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.topnav{animation:fadeUp 0.35s ease 0.05s both;}
+.kbd-card{animation:fadeUp 0.35s ease 0.1s both;}
+.controls-grid{animation:fadeUp 0.35s ease 0.16s both;}
+
+@media(max-width:620px){
+  .main{padding:10px;}
+  .hint-bar{display:none;}
+  .nav-pills{display:none;}
+  .brand-text p{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOAD SCREEN -->
+<div id="load-screen">
+  <div class="load-badge">
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="2"  y="10" width="2.2" height="8"  rx="1.1" fill="#f5a623"/>
+      <rect x="5.9"y="7"  width="2.2" height="11" rx="1.1" fill="#f5a623"/>
+      <rect x="9.9"y="4"  width="2.2" height="14" rx="1.1" fill="#f5a623" opacity="0.9"/>
+      <rect x="13.9"y="7" width="2.2" height="11" rx="1.1" fill="#f5a623" opacity="0.7"/>
+      <rect x="17.8"y="10"width="2.2" height="8"  rx="1.1" fill="#f5a623" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="load-text">
+    <h2>Web <span>Harmonium</span></h2>
+    <p>by Biswajit Maji &nbsp;·&nbsp; Real harmonium sample engine</p>
+  </div>
+  <button id="load-btn" onclick="initAndLoad()">▶ &nbsp;Start Playing</button>
+  <div id="load-status"></div>
+</div>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2"  y="9"  width="2" height="7"  rx="1" fill="white"/>
+        <rect x="5.5"y="7"  width="2" height="9"  rx="1" fill="white"/>
+        <rect x="9"  y="5"  width="2" height="11" rx="1" fill="white" opacity="0.9"/>
+        <rect x="12.5"y="7" width="2" height="9"  rx="1" fill="white" opacity="0.75"/>
+        <rect x="16" y="9" width="2" height="7"  rx="1" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>Web Harmonium</h1>
+      <p>Real Harmonium Sample Engine</p>
+    </div>
+  </div>
+
+  <div class="nav-pills">
+    <div class="nav-pill hi"><div class="nav-dot"></div><span id="nav-key">Key: C</span></div>
+    <div class="nav-pill"><span id="nav-oct">Oct: 4</span></div>
+    <div class="nav-pill"><span id="nav-vol">Vol: 80%</span></div>
+  </div>
+
+  <button class="theme-btn" onclick="toggleTheme()" style="margin-left:auto">
+    <span id="theme-ico">☀</span> <span id="theme-lbl">Light</span>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- KEYBOARD CARD -->
+  <div class="kbd-card">
+    <div class="kbd-top">
+      <span class="kbd-label">Keyboard</span>
+      <div class="note-row">
+        <div class="note-badge" id="status-note">—</div>
+        <div class="sargam-badge" id="status-sargam">—</div>
+      </div>
+      <div class="kbd-btns">
+        <button class="abtn abtn-rec" id="record-btn" onclick="toggleRecord()">
+          <div class="rec-dot"></div> Record
+        </button>
+        <button class="abtn abtn-drone" id="drone-btn" onclick="toggleDrone()">
+          ♩ Drone Sa
+        </button>
+      </div>
+    </div>
+
+    <div class="keyboard-wrap">
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <div class="hint-bar">
+      <div class="hint-item"><span class="hint-key">` → ]</span> White keys</div>
+      <div class="hint-sep"></div>
+      <div class="hint-item"><span class="hint-key">1 2 4 5 7 8 9 - =</span> Black keys</div>
+      <div class="hint-sep"></div>
+      <div class="hint-item"><span class="hint-key">Z</span> Oct ↓ &nbsp; <span class="hint-key">X</span> Oct ↑</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-grid">
+
+    <div class="ctrl-card">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl"><div class="ctrl-ico ic-o">🔊</div><div class="ctrl-name">Volume</div></div>
+        <div class="ctrl-shortcut">Alt+↑↓</div>
+      </div>
+      <div class="ctrl-big" id="vol-big">80<sup>%</sup></div>
+      <div class="ctrl-sub" id="vol-sub">High</div>
+      <div class="range-wrap">
+        <input type="range" id="vol" min="0" max="100" value="80" step="1" oninput="setVol(this.value)">
+      </div>
+    </div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl"><div class="ctrl-ico ic-t">✦</div><div class="ctrl-name">Reverb</div></div>
+        <div class="ctrl-shortcut">Ctrl+R</div>
+      </div>
+      <div class="ctrl-big" id="rev-big" style="color:var(--green)">25<sup>%</sup></div>
+      <div class="ctrl-sub">Room mix</div>
+      <div class="range-wrap">
+        <input type="range" id="rev" min="0" max="100" value="25" step="1" oninput="setRev(this.value)" style="background:linear-gradient(to right,var(--green) 0%,var(--green) 25%,var(--card2) 25%)">
+      </div>
+    </div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl"><div class="ctrl-ico ic-b" style="font-size:16px;font-weight:900;">♭</div><div class="ctrl-name">Transpose</div></div>
+        <div class="ctrl-shortcut">Ctrl+←→</div>
+      </div>
+      <div class="stepper">
+        <button class="stp-btn" onclick="changeTranspose(-1)">−</button>
+        <div class="stp-val" id="tr-val" style="color:var(--blue)">C</div>
+        <button class="stp-btn" onclick="changeTranspose(1)">+</button>
+      </div>
+      <div class="ctrl-sub" id="tr-sub" style="margin-top:7px">±0 semitones</div>
+    </div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl"><div class="ctrl-ico ic-p">↕</div><div class="ctrl-name">Octave</div></div>
+        <div class="ctrl-shortcut">Z / X</div>
+      </div>
+      <div class="stepper">
+        <button class="stp-btn" onclick="changeOctave(-1)">−</button>
+        <div class="stp-val" id="oct-val" style="color:#a064f0">4</div>
+        <button class="stp-btn" onclick="changeOctave(1)">+</button>
+      </div>
+      <div class="ctrl-sub" id="oct-sub" style="margin-top:7px">Middle</div>
+    </div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl"><div class="ctrl-ico ic-pk">≋</div><div class="ctrl-name">Reeds</div></div>
+        <div class="ctrl-shortcut">Layers</div>
+      </div>
+      <div class="stepper">
+        <button class="stp-btn" onclick="changeReeds(-1)">−</button>
+        <div class="stp-val" id="reeds-val" style="color:#f0508c">0</div>
+        <button class="stp-btn" onclick="changeReeds(1)">+</button>
+      </div>
+      <div class="ctrl-sub" style="margin-top:7px">Extra harmonics</div>
+    </div>
+
+    <!-- MIDI CARD -->
+    <div class="ctrl-card" id="midi-ctrl-card" style="display:flex;flex-direction:column;">
+      <div class="ctrl-head">
+        <div class="ctrl-lbl">
+          <div class="ctrl-ico" style="background:rgba(74,144,240,0.12)">
+            <svg viewBox="0 0 16 16" fill="none" style="width:13px;height:13px;">
+              <rect x="1" y="5" width="14" height="6" rx="2" stroke="#4a90f0" stroke-width="1.3"/>
+              <rect x="3" y="7.5" width="2" height="1" rx="0.5" fill="#4a90f0"/>
+              <rect x="7" y="7.5" width="2" height="1" rx="0.5" fill="#4a90f0"/>
+              <rect x="11" y="7.5" width="2" height="1" rx="0.5" fill="#4a90f0"/>
+              <path d="M4 5V3.5a.5.5 0 011 0V5" stroke="#4a90f0" stroke-width="1.1"/>
+              <path d="M11 5V3.5a.5.5 0 011 0V5" stroke="#4a90f0" stroke-width="1.1"/>
+            </svg>
+          </div>
+          <div class="ctrl-name">MIDI</div>
+        </div>
+        <div id="midi-status-badge" class="midi-status-badge idle"><div class="midi-status-dot"></div><span id="midi-status-txt">Off</span></div>
+      </div>
+      <div id="midi-devices-list" class="midi-devices-list"></div>
+      <div style="flex:1"></div>
+      <button class="midi-request-btn" id="midi-req-btn" onclick="showMidiPopup()" style="margin-top:10px;">
+        Connect MIDI Device
+      </button>
+    </div>
+
+  </div>
+
+  <div id="recordings-section"></div>
+
+</div>
+
+<div class="footer">Web Harmonium &nbsp;·&nbsp; by Biswajit Maji &nbsp;·&nbsp; Real harmonium sample engine in the browser</div>
+
+<!-- MIDI PERMISSION POPUP -->
+<div class="midi-overlay" id="midi-overlay" style="display:none" onclick="handleOverlayClick(event)">
+  <div class="midi-popup" id="midi-popup">
+    <!-- Top bar tab -->
+    <div class="midi-popup-top">
+      <div class="midi-popup-tab">
+        <svg viewBox="0 0 14 14" fill="none">
+          <rect x="0.5" y="3" width="13" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="2" y="5.5" width="1.5" height="1" rx="0.4" fill="currentColor"/>
+          <rect x="6.25" y="5.5" width="1.5" height="1" rx="0.4" fill="currentColor"/>
+          <rect x="10.5" y="5.5" width="1.5" height="1" rx="0.4" fill="currentColor"/>
+        </svg>
+        Control &amp; reprogram MIDI devices?
+      </div>
+      <button class="midi-close-btn" onclick="closeMidiPopup(false)" title="Close">×</button>
+    </div>
+
+    <!-- Body -->
+    <div class="midi-popup-body">
+      <div class="midi-popup-title">
+        <span>Web Harmonium</span> is asking you to
+      </div>
+
+      <div class="midi-perm-row">
+        <div class="midi-perm-icon">
+          <svg viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="5" width="14" height="7" rx="2" stroke="#4a90f0" stroke-width="1.3"/>
+            <rect x="3" y="7.5" width="2" height="1.2" rx="0.5" fill="#4a90f0"/>
+            <rect x="7" y="7.5" width="2" height="1.2" rx="0.5" fill="#4a90f0"/>
+            <rect x="11" y="7.5" width="2" height="1.2" rx="0.5" fill="#4a90f0"/>
+            <path d="M4 5V3.5a.5.5 0 011 0V5" stroke="#4a90f0" stroke-width="1.1"/>
+            <path d="M11 5V3.5a.5.5 0 011 0V5" stroke="#4a90f0" stroke-width="1.1"/>
+          </svg>
+        </div>
+        <div class="midi-perm-text">Control and reprogram your MIDI devices</div>
+      </div>
+
+      <div class="midi-remember">
+        <span class="midi-remember-lbl">Remember my decision</span>
+        <select class="midi-remember-sel" id="midi-remember-sel">
+          <option value="session">until I close this site</option>
+          <option value="forever">forever</option>
+          <option value="never">never</option>
+        </select>
+      </div>
+
+      <div class="midi-popup-btns">
+        <button class="midi-btn midi-btn-allow" onclick="closeMidiPopup(true)">Allow</button>
+        <button class="midi-btn midi-btn-block" onclick="closeMidiPopup(false)">Block</button>
+      </div>
+    </div>
+
+    <div class="midi-popup-footer">
+      You can change your <a href="#" onclick="return false">site permission</a> at any time.
+      <a href="#" onclick="return false">Learn more</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var ctx,masterGain,dryGain,reverbGain,convolver,sampleBuffer,mediaDest;
+var transpose=0,octave=4,reeds=0;
+var droneOn=false,droneNodes=[];
+var activeNodes={},heldKeys=new Set();
+var mediaRecorder,recordedChunks=[],isRecording=false;
+var recordings=[],recordingCounter=1;
+var playbackSource,currentPlaybackIndex=-1;
+var progressIntervals={},playbackOffsets={},playbackStartTimes={};
+
+var SAMPLE_ROOT_MIDI=62;
+var NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+var SARGAM={0:'Sa',1:'re',2:'Re',3:'ga',4:'Ga',5:'Ma',6:'ma',7:'Pa',8:'dha',9:'Dha',10:'ni',11:'Ni'};
+
+var WHITE_KEYS=[
+  {kb:'`',ni:0,oo:0},{kb:'q',ni:2,oo:0},{kb:'w',ni:4,oo:0},
+  {kb:'e',ni:5,oo:0},{kb:'r',ni:7,oo:0},{kb:'t',ni:9,oo:0},
+  {kb:'y',ni:11,oo:0},{kb:'u',ni:0,oo:1},{kb:'i',ni:2,oo:1},
+  {kb:'o',ni:4,oo:1},{kb:'p',ni:5,oo:1},{kb:'[',ni:7,oo:1},
+  {kb:']',ni:9,oo:1}
+];
+var BLACK_KEYS=[
+  {kb:'1',ni:1,oo:0,after:0},{kb:'2',ni:3,oo:0,after:1},
+  {kb:'4',ni:6,oo:0,after:3},{kb:'5',ni:8,oo:0,after:4},
+  {kb:'7',ni:10,oo:0,after:5},{kb:'8',ni:1,oo:1,after:7},
+  {kb:'9',ni:3,oo:1,after:8},{kb:'-',ni:6,oo:1,after:10},{kb:'=',ni:8,oo:1,after:11}
+];
+var KB_MAP={};
+WHITE_KEYS.forEach(function(k){KB_MAP[k.kb]=k;});
+BLACK_KEYS.forEach(function(k){KB_MAP[k.kb]=k;});
+
+async function initAndLoad(){
+  var btn=document.getElementById('load-btn'),status=document.getElementById('load-status');
+  btn.disabled=true; btn.textContent='Loading…';
+  try{
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    masterGain=ctx.createGain(); masterGain.gain.value=0.8;
+    dryGain=ctx.createGain(); dryGain.gain.value=0.75;
+    reverbGain=ctx.createGain(); reverbGain.gain.value=0.25;
+    convolver=ctx.createConvolver();
+    dryGain.connect(masterGain); reverbGain.connect(masterGain); masterGain.connect(ctx.destination);
+    mediaDest=ctx.createMediaStreamDestination(); masterGain.connect(mediaDest);
+    status.textContent='Loading harmonium sample…';
+    var sr=await fetch('harmonium-kannan-orig.wav');
+    if(!sr.ok) throw new Error('harmonium-kannan-orig.wav not found in this folder');
+    sampleBuffer=await ctx.decodeAudioData(await sr.arrayBuffer());
+    status.textContent='Loading reverb…';
+    try{
+      var rr=await fetch('reverb.wav');
+      convolver.buffer=rr.ok?await ctx.decodeAudioData(await rr.arrayBuffer()):makeImpulse();
+    }catch(e){convolver.buffer=makeImpulse();}
+    var ls=document.getElementById('load-screen');
+    ls.style.transition='opacity 0.4s ease'; ls.style.opacity='0';
+    setTimeout(function(){ls.style.display='none';},420);
+  }catch(err){
+    status.textContent='⚠ '+err.message; btn.disabled=false; btn.textContent='▶ Try Again';
+  }
+}
+
+function makeImpulse(){
+  var rate=ctx.sampleRate,len=rate*2,buf=ctx.createBuffer(2,len,rate);
+  for(var c=0;c<2;c++){var d=buf.getChannelData(c);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);}
+  return buf;
+}
+
+function midiForKey(ni,oo){return ni+(octave+oo)*12+transpose;}
+
+function startNote(id,midi){
+  if(!ctx||!sampleBuffer||activeNodes[id])return;
+  var detunes=[0];
+  for(var r=0;r<reeds;r++){detunes.push(1200+(Math.random()-0.5)*28);detunes.push(-1200+(Math.random()-0.5)*28);}
+  var group=detunes.map(function(det){
+    var src=ctx.createBufferSource();
+    src.buffer=sampleBuffer; src.loop=true; src.loopStart=0.3; src.loopEnd=sampleBuffer.duration;
+    src.detune.value=(midi-SAMPLE_ROOT_MIDI)*100+det;
+    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.22,ctx.currentTime+0.02);
+    var filt=ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=4000;
+    src.connect(filt); filt.connect(g); g.connect(dryGain); g.connect(convolver); convolver.connect(reverbGain); src.start();
+    return{src:src,g:g};
+  });
+  activeNodes[id]=group; updateStatus(id);
+}
+
+function stopNote(id){
+  var group=activeNodes[id]; if(!group)return;
+  group.forEach(function(n){
+    n.g.gain.setValueAtTime(n.g.gain.value,ctx.currentTime);
+    n.g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.08);
+    n.src.stop(ctx.currentTime+0.09);
+  });
+  delete activeNodes[id];
+  if(!Object.keys(activeNodes).length)updateStatus(null);
+}
+
+function toggleDrone(){
+  if(!ctx||!sampleBuffer)return;
+  droneOn=!droneOn;
+  var btn=document.getElementById('drone-btn');
+  if(droneOn){
+    var midi=octave*12+transpose,src=ctx.createBufferSource();
+    src.buffer=sampleBuffer; src.loop=true; src.loopStart=0.3; src.loopEnd=sampleBuffer.duration;
+    src.detune.value=(midi-SAMPLE_ROOT_MIDI)*100;
+    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.15,ctx.currentTime+0.4);
+    src.connect(g); g.connect(dryGain); g.connect(convolver); src.start();
+    droneNodes=[{src:src,g:g}]; btn.textContent='◉ Drone On'; btn.classList.add('on');
+  }else{
+    droneNodes.forEach(function(n){n.g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.5);n.src.stop(ctx.currentTime+0.55);});
+    droneNodes=[]; btn.textContent='♩ Drone Sa'; btn.classList.remove('on');
+  }
+}
+
+function setVol(v){
+  document.getElementById('vol-big').innerHTML=v+'<sup>%</sup>';
+  document.getElementById('vol-sub').textContent=v>=80?'High':v>=40?'Medium':'Low';
+  document.getElementById('nav-vol').textContent='Vol: '+v+'%';
+  var p=v+'%';
+  document.getElementById('vol').style.background='linear-gradient(to right,var(--accent) 0%,var(--accent) '+p+',var(--card2) '+p+')';
+  if(masterGain)masterGain.gain.value=v/100;
+}
+function setRev(v){
+  document.getElementById('rev-big').innerHTML=v+'<sup>%</sup>';
+  document.getElementById('rev').style.background='linear-gradient(to right,var(--green) 0%,var(--green) '+v+'%,var(--card2) '+v+'%)';
+  if(dryGain){dryGain.gain.value=1-v/100*0.6; reverbGain.gain.value=v/100*0.5;}
+}
+function changeTranspose(d){
+  transpose=Math.max(-12,Math.min(12,transpose+d));
+  var label=NOTE_NAMES[((transpose%12)+12)%12];
+  document.getElementById('tr-val').textContent=label;
+  document.getElementById('tr-sub').textContent=(transpose>0?'+':'')+transpose+' semitones';
+  document.getElementById('nav-key').textContent='Key: '+label;
+}
+function changeOctave(d){
+  octave=Math.max(2,Math.min(6,octave+d));
+  document.getElementById('oct-val').textContent=octave;
+  document.getElementById('nav-oct').textContent='Oct: '+octave;
+  var labels={2:'Very Low',3:'Low',4:'Middle',5:'High',6:'Very High'};
+  document.getElementById('oct-sub').textContent=labels[octave]||'';
+  buildKeyboard();
+}
+function changeReeds(d){
+  reeds=Math.max(0,Math.min(3,reeds+d));
+  document.getElementById('reeds-val').textContent=reeds;
+}
+
+function updateStatus(id){
+  var nb=document.getElementById('status-note'),sb=document.getElementById('status-sargam');
+  if(!id){nb.textContent='—';nb.classList.remove('on');sb.textContent='—';return;}
+  var parts=id.split('-'),ni=parseInt(parts[0]),oo=parseInt(parts[1]);
+  nb.textContent=NOTE_NAMES[ni]+(octave+oo); nb.classList.add('on');
+  sb.textContent=SARGAM[ni];
+}
+
+function toggleRecord(){
+  if(!ctx)return;
+  var btn=document.getElementById('record-btn');
+  if(!isRecording){
+    recordedChunks=[];
+    mediaRecorder=new MediaRecorder(mediaDest.stream);
+    mediaRecorder.ondataavailable=function(e){if(e.data.size>0)recordedChunks.push(e.data);};
+    mediaRecorder.onstop=function(){
+      var blob=new Blob(recordedChunks,{type:'audio/wav'}),name='Recording '+recordingCounter++;
+      blob.arrayBuffer().then(function(ab){return ctx.decodeAudioData(ab);}).then(function(buffer){
+        recordings.push({name:name,buffer:buffer,blob:blob}); renderRecordings();
+      });
+    };
+    mediaRecorder.start(); isRecording=true;
+    btn.innerHTML='<div class="rec-dot"></div> Stop'; btn.classList.add('on');
+  }else{
+    mediaRecorder.stop(); isRecording=false;
+    btn.innerHTML='<div class="rec-dot"></div> Record'; btn.classList.remove('on');
+  }
+}
+
+function renderRecordings(){
+  var section=document.getElementById('recordings-section');
+  if(recordings.length===0){section.innerHTML='';return;}
+
+  // First render: build the full list if it doesn't exist yet
+  if(!document.getElementById('recordings-list')){
+    section.innerHTML='<div class="rec-hdr">Recordings</div><div id="recordings-list"></div>';
+  }
+  var list=document.getElementById('recordings-list');
+
+  recordings.forEach(function(rec,index){
+    var existing=document.getElementById('rec-'+index);
+    if(existing){
+      // Just update the play button state — don't rebuild the whole row
+      var pb=existing.querySelector('.rec-play-btn');
+      var isPlaying=currentPlaybackIndex===index&&playbackSource;
+      if(pb){ pb.innerHTML=isPlaying?'⏸':'▶'; pb.className='rec-play-btn'+(isPlaying?' playing':''); }
+      return;
+    }
+
+    // Build row fresh only when it doesn't exist
+    var isPlaying=currentPlaybackIndex===index&&playbackSource;
+    var div=document.createElement('div'); div.id='rec-'+index; div.className='rec-item';
+
+    var pb=document.createElement('button');
+    pb.className='rec-play-btn'+(isPlaying?' playing':'');
+    pb.innerHTML=isPlaying?'⏸':'▶';
+    pb.onclick=function(){togglePlayback(index);};
+
+    var nm=document.createElement('div'); nm.className='rec-name'; nm.textContent=rec.name;
+
+    var pw=document.createElement('div'); pw.className='rec-pw';
+    var pbg=document.createElement('div'); pbg.className='progress-bar-bg';
+    pbg.onclick=function(e){seekTo(index,e);};
+    var pf=document.createElement('div'); pf.className='progress-fill'; pbg.appendChild(pf);
+    var time=document.createElement('div'); time.className='rec-time';
+    time.id='rec-time-'+index;
+    time.textContent='0:00 / '+formatTime(rec.buffer.duration);
+    pw.appendChild(pbg); pw.appendChild(time);
+
+    var dl=document.createElement('button'); dl.className='rec-dl-btn'; dl.innerHTML='↓'; dl.title='Download';
+    dl.onclick=function(){var url=URL.createObjectURL(rec.blob);var a=document.createElement('a');a.href=url;a.download=rec.name+'.wav';a.click();URL.revokeObjectURL(url);};
+
+    div.appendChild(pb); div.appendChild(nm); div.appendChild(pw); div.appendChild(dl);
+    list.appendChild(div);
+  });
+}
+
+function setPlayBtn(index, isPlaying){
+  var row=document.getElementById('rec-'+index);
+  if(!row)return;
+  var pb=row.querySelector('.rec-play-btn');
+  if(!pb)return;
+  pb.innerHTML=isPlaying?'⏸':'▶';
+  pb.className='rec-play-btn'+(isPlaying?' playing':'');
+}
+
+function startProgressInterval(index){
+  if(progressIntervals[index]){clearInterval(progressIntervals[index]); delete progressIntervals[index];}
+  progressIntervals[index]=setInterval(function(){
+    if(currentPlaybackIndex!==index||!playbackSource){
+      clearInterval(progressIntervals[index]); delete progressIntervals[index]; return;
+    }
+    var elapsed=ctx.currentTime-playbackStartTimes[index];
+    var duration=recordings[index].buffer.duration;
+    var position=Math.min(elapsed, duration);
+    var pct=(position/duration)*100;
+
+    var row=document.getElementById('rec-'+index);
+    if(row){
+      var fill=row.querySelector('.progress-fill');
+      if(fill) fill.style.width=pct+'%';
+      var timeEl=document.getElementById('rec-time-'+index);
+      if(timeEl) timeEl.textContent=formatTime(position)+' / '+formatTime(duration);
+    }
+  },80);
+}
+
+function togglePlayback(index){
+  // --- PAUSE / STOP currently playing same track ---
+  if(currentPlaybackIndex===index&&playbackSource){
+    playbackSource.onended=null;
+    playbackSource.stop();
+    playbackSource=null;
+    if(progressIntervals[index]){clearInterval(progressIntervals[index]);delete progressIntervals[index];}
+    // Reset to beginning so next press plays from start
+    playbackOffsets[index]=0;
+    currentPlaybackIndex=-1;
+    // Reset bar & time
+    var row=document.getElementById('rec-'+index);
+    if(row){
+      var fill=row.querySelector('.progress-fill');
+      if(fill) fill.style.width='0%';
+      var timeEl=document.getElementById('rec-time-'+index);
+      if(timeEl) timeEl.textContent='0:00 / '+formatTime(recordings[index].buffer.duration);
+    }
+    setPlayBtn(index,false);
+    return;
+  }
+
+  // --- STOP any other playing track first ---
+  if(playbackSource&&currentPlaybackIndex>=0){
+    var prev=currentPlaybackIndex;
+    playbackSource.onended=null;
+    playbackSource.stop();
+    playbackSource=null;
+    if(progressIntervals[prev]){clearInterval(progressIntervals[prev]);delete progressIntervals[prev];}
+    playbackOffsets[prev]=0;
+    var prevRow=document.getElementById('rec-'+prev);
+    if(prevRow){
+      var prevFill=prevRow.querySelector('.progress-fill');
+      if(prevFill) prevFill.style.width='0%';
+      var prevTime=document.getElementById('rec-time-'+prev);
+      if(prevTime) prevTime.textContent='0:00 / '+formatTime(recordings[prev].buffer.duration);
+    }
+    setPlayBtn(prev,false);
+    currentPlaybackIndex=-1;
+  }
+
+  // --- START new playback ---
+  var src=ctx.createBufferSource();
+  src.buffer=recordings[index].buffer;
+  src.connect(masterGain);
+  src.start(0,0);
+  playbackSource=src;
+  playbackStartTimes[index]=ctx.currentTime;
+  currentPlaybackIndex=index;
+  setPlayBtn(index,true);
+  startProgressInterval(index);
+
+  src.onended=function(){
+    if(playbackSource!==src)return; // already replaced
+    playbackSource=null;
+    if(progressIntervals[index]){clearInterval(progressIntervals[index]);delete progressIntervals[index];}
+    playbackOffsets[index]=0;
+    currentPlaybackIndex=-1;
+    // Show full bar briefly then reset
+    var row=document.getElementById('rec-'+index);
+    if(row){
+      var fill=row.querySelector('.progress-fill');
+      if(fill) fill.style.width='100%';
+      setTimeout(function(){
+        if(currentPlaybackIndex!==index){ // only reset if not replayed
+          if(fill) fill.style.width='0%';
+          var timeEl=document.getElementById('rec-time-'+index);
+          if(timeEl) timeEl.textContent='0:00 / '+formatTime(recordings[index].buffer.duration);
+        }
+      },400);
+    }
+    setPlayBtn(index,false);
+  };
+}
+
+function seekTo(index,event){
+  var rect=event.currentTarget.getBoundingClientRect();
+  var duration=recordings[index].buffer.duration;
+  var seekTime=Math.max(0,Math.min(((event.clientX-rect.left)/rect.width)*duration, duration));
+
+  // Update bar and time display immediately
+  var row=document.getElementById('rec-'+index);
+  if(row){
+    var fill=row.querySelector('.progress-fill');
+    if(fill) fill.style.width=((seekTime/duration)*100)+'%';
+    var timeEl=document.getElementById('rec-time-'+index);
+    if(timeEl) timeEl.textContent=formatTime(seekTime)+' / '+formatTime(duration);
+  }
+
+  if(currentPlaybackIndex===index&&playbackSource){
+    // Replace the running source at new position
+    playbackSource.onended=null;
+    playbackSource.stop();
+    if(progressIntervals[index]){clearInterval(progressIntervals[index]);delete progressIntervals[index];}
+
+    var src=ctx.createBufferSource();
+    src.buffer=recordings[index].buffer;
+    src.connect(masterGain);
+    src.start(0,seekTime);
+    playbackSource=src;
+    playbackStartTimes[index]=ctx.currentTime-seekTime;
+    startProgressInterval(index);
+
+    src.onended=function(){
+      if(playbackSource!==src)return;
+      playbackSource=null;
+      if(progressIntervals[index]){clearInterval(progressIntervals[index]);delete progressIntervals[index];}
+      playbackOffsets[index]=0;
+      currentPlaybackIndex=-1;
+      var r=document.getElementById('rec-'+index);
+      if(r){
+        var f=r.querySelector('.progress-fill');
+        if(f)f.style.width='0%';
+        var t=document.getElementById('rec-time-'+index);
+        if(t)t.textContent='0:00 / '+formatTime(duration);
+      }
+      setPlayBtn(index,false);
+    };
+  }
+}
+
+function formatTime(s){var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
+
+function toggleTheme(){
+  document.body.classList.toggle('light-mode');
+  var isLight=document.body.classList.contains('light-mode');
+  document.getElementById('theme-ico').textContent=isLight?'🌙':'☀';
+  document.getElementById('theme-lbl').textContent=isLight?'Dark':'Light';
+}
+
+function buildKeyboard(){
+  var kbd=document.getElementById('keyboard'); kbd.innerHTML='';
+  var WW=46,GAP=3;
+  WHITE_KEYS.forEach(function(w){
+    var div=document.createElement('div'); div.className='wk'; div.dataset.id=w.ni+'-'+w.oo;
+    var midi=midiForKey(w.ni,w.oo);
+    div.innerHTML='<span class="nl">'+NOTE_NAMES[w.ni]+'</span><span class="kl">'+w.kb.toUpperCase()+'</span>';
+    var id=w.ni+'-'+w.oo;
+    div.addEventListener('mousedown',function(e){e.preventDefault();if(ctx)startNote(id,midi);div.classList.add('active');});
+    div.addEventListener('mouseup',function(){stopNote(id);div.classList.remove('active');});
+    div.addEventListener('mouseleave',function(){stopNote(id);div.classList.remove('active');});
+    div.addEventListener('touchstart',function(e){e.preventDefault();if(ctx)startNote(id,midi);div.classList.add('active');},{passive:false});
+    div.addEventListener('touchend',function(e){e.preventDefault();stopNote(id);div.classList.remove('active');},{passive:false});
+    kbd.appendChild(div);
+  });
+  BLACK_KEYS.forEach(function(b){
+    var div=document.createElement('div'); div.className='bk'; div.dataset.id=b.ni+'-'+b.oo;
+    var midi=midiForKey(b.ni,b.oo);
+    div.style.left=(b.after*(WW+GAP)+WW-15)+'px';
+    div.innerHTML='<span class="kl">'+b.kb.toUpperCase()+'</span>';
+    var id=b.ni+'-'+b.oo;
+    div.addEventListener('mousedown',function(e){e.preventDefault();if(ctx)startNote(id,midi);div.classList.add('active');});
+    div.addEventListener('mouseup',function(){stopNote(id);div.classList.remove('active');});
+    div.addEventListener('mouseleave',function(){stopNote(id);div.classList.remove('active');});
+    div.addEventListener('touchstart',function(e){e.preventDefault();if(ctx)startNote(id,midi);div.classList.add('active');},{passive:false});
+    div.addEventListener('touchend',function(e){e.preventDefault();stopNote(id);div.classList.remove('active');},{passive:false});
+    kbd.appendChild(div);
+  });
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.repeat)return;
+  if(e.key==='z'||e.key==='Z'){changeOctave(-1);return;}
+  if(e.key==='x'||e.key==='X'){changeOctave(1);return;}
+  var key=e.key.toLowerCase();
+  if(heldKeys.has(key)||!KB_MAP[key])return;
+  heldKeys.add(key);
+  var m=KB_MAP[key],id=m.ni+'-'+m.oo;
+  if(ctx)startNote(id,midiForKey(m.ni,m.oo));
+  var el=document.querySelector('[data-id="'+id+'"]');
+  if(el)el.classList.add('active');
+});
+document.addEventListener('keyup',function(e){
+  var key=e.key.toLowerCase(); heldKeys.delete(key);
+  var m=KB_MAP[key]; if(!m)return;
+  var id=m.ni+'-'+m.oo; stopNote(id);
+  var el=document.querySelector('[data-id="'+id+'"]');
+  if(el)el.classList.remove('active');
+});
+
+// Init range fill
+setVol(80);
+buildKeyboard();
+</script>
+</body>
+</html>
+
+<script>
+/* ══════════════════════════════
+   MIDI PERMISSION + CONTROL
+══════════════════════════════ */
+var midiAccess=null,midiAllowed=false;
+
+function showMidiPopup(){document.getElementById('midi-overlay').style.display='flex';}
+function handleOverlayClick(e){if(e.target===document.getElementById('midi-overlay'))closeMidiPopup(false);}
+function closeMidiPopup(allow){
+  document.getElementById('midi-overlay').style.display='none';
+  if(allow)requestMidiAccess(); else setMidiStatus('blocked');
+}
+
+function setMidiStatus(state,devices){
+  var badge=document.getElementById('midi-status-badge'),txt=document.getElementById('midi-status-txt'),btn=document.getElementById('midi-req-btn');
+  badge.className='midi-status-badge '+state;
+  if(state==='allowed'){txt.textContent='Connected';btn.textContent='Refresh Devices';renderMidiDevices(devices||[]);}
+  else if(state==='blocked'){txt.textContent='Blocked';btn.textContent='Try Again';renderMidiDevices([]);}
+  else{txt.textContent='Off';btn.textContent='Connect MIDI Device';renderMidiDevices([]);}
+}
+
+function renderMidiDevices(devices){
+  var list=document.getElementById('midi-devices-list');list.innerHTML='';
+  if(!devices.length){
+    if(midiAllowed){var d=document.createElement('div');d.className='midi-device-item';d.style.color='var(--ink3)';d.innerHTML='<span style="font-size:0.7rem">No devices detected</span>';list.appendChild(d);}
+    return;
+  }
+  devices.forEach(function(name){var d=document.createElement('div');d.className='midi-device-item';d.innerHTML='<div class="midi-device-dot"></div><span>'+name+'</span>';list.appendChild(d);});
+}
+
+async function requestMidiAccess(){
+  if(!navigator.requestMIDIAccess){setMidiStatus('blocked');alert('Web MIDI API is not supported in this browser. Try Chrome or Edge.');return;}
+  try{
+    midiAccess=await navigator.requestMIDIAccess({sysex:true});
+    midiAllowed=true;
+    var deviceNames=[];midiAccess.inputs.forEach(function(input){deviceNames.push(input.name);});
+    setMidiStatus('allowed',deviceNames);setupMidiInputs();
+    midiAccess.onstatechange=function(e){
+      var names=[];midiAccess.inputs.forEach(function(input){names.push(input.name);});
+      setMidiStatus('allowed',names);setupMidiInputs();
+    };
+  }catch(err){midiAllowed=false;setMidiStatus('blocked');console.warn('MIDI access denied:',err);}
+}
+
+function setupMidiInputs(){
+  if(!midiAccess)return;
+  midiAccess.inputs.forEach(function(input){input.onmidimessage=handleMidiMessage;});
+}
+
+var midiActiveNotes={};
+
+function handleMidiMessage(event){
+  if(!ctx||!sampleBuffer)return;
+  var cmd=event.data[0]&0xf0,note=event.data[1],vel=event.data.length>2?event.data[2]:0,id='midi-'+note;
+  if(cmd===0x90&&vel>0){
+    if(midiActiveNotes[id])return;
+    var detunes=[0];
+    for(var r=0;r<reeds;r++){detunes.push(1200+(Math.random()-0.5)*28);detunes.push(-1200+(Math.random()-0.5)*28);}
+    var group=detunes.map(function(det){
+      var src=ctx.createBufferSource();src.buffer=sampleBuffer;src.loop=true;src.loopStart=0.3;src.loopEnd=sampleBuffer.duration;
+      src.detune.value=(note-SAMPLE_ROOT_MIDI)*100+det;
+      var g=ctx.createGain(),volScale=vel/127;
+      g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.22*volScale,ctx.currentTime+0.02);
+      var filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=4000;
+      src.connect(filt);filt.connect(g);g.connect(dryGain);g.connect(convolver);convolver.connect(reverbGain);src.start();
+      return{src:src,g:g};
+    });
+    midiActiveNotes[id]=group;
+    var ni=note%12,oc=Math.floor(note/12)-1;
+    var nb=document.getElementById('status-note'),sb=document.getElementById('status-sargam');
+    if(nb){nb.textContent=NOTE_NAMES[ni]+oc;nb.classList.add('on');}
+    if(sb)sb.textContent=SARGAM[ni];
+  }else if(cmd===0x80||(cmd===0x90&&vel===0)){
+    var grp=midiActiveNotes[id];if(!grp)return;
+    grp.forEach(function(n){n.g.gain.setValueAtTime(n.g.gain.value,ctx.currentTime);n.g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.08);n.src.stop(ctx.currentTime+0.09);});
+    delete midiActiveNotes[id];
+    if(!Object.keys(midiActiveNotes).length&&!Object.keys(activeNodes).length){
+      var nb2=document.getElementById('status-note');if(nb2){nb2.textContent='—';nb2.classList.remove('on');}
+      var sb2=document.getElementById('status-sargam');if(sb2)sb2.textContent='—';
+    }
+  }else if(cmd===0xb0){
+    var cc=event.data[1],cv=event.data[2];
+    if(cc===7){var vp=Math.round(cv/127*100);setVol(vp);document.getElementById('vol').value=vp;}
+    if(cc===1){var rp=Math.round(cv/127*100);setRev(rp);document.getElementById('rev').value=rp;}
+  }
+}
+</script>
