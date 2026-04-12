@@ -492,8 +492,8 @@ async function initAndLoad(){
   btn.disabled=true; btn.textContent='Loading…';
   try{
     ctx=new (window.AudioContext||window.webkitAudioContext)();
-    masterGain=ctx.createGain(); masterGain.gain.value=0.8;
-    dryGain=ctx.createGain(); dryGain.gain.value=0.75;
+    masterGain=ctx.createGain(); masterGain.gain.value=1.0;
+    dryGain=ctx.createGain(); dryGain.gain.value=1.0;
     reverbGain=ctx.createGain(); reverbGain.gain.value=0.25;
     convolver=ctx.createConvolver();
     dryGain.connect(masterGain); reverbGain.connect(masterGain); masterGain.connect(ctx.destination);
@@ -531,7 +531,7 @@ function startNote(id,midi){
     var src=ctx.createBufferSource();
     src.buffer=sampleBuffer; src.loop=true; src.loopStart=0.3; src.loopEnd=sampleBuffer.duration;
     src.detune.value=(midi-SAMPLE_ROOT_MIDI)*100+det;
-    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.22,ctx.currentTime+0.02);
+    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.6,ctx.currentTime+0.02);
     var filt=ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=4000;
     src.connect(filt); filt.connect(g); g.connect(dryGain); g.connect(convolver); convolver.connect(reverbGain); src.start();
     return{src:src,g:g};
@@ -558,7 +558,7 @@ function toggleDrone(){
     var midi=octave*12+transpose,src=ctx.createBufferSource();
     src.buffer=sampleBuffer; src.loop=true; src.loopStart=0.3; src.loopEnd=sampleBuffer.duration;
     src.detune.value=(midi-SAMPLE_ROOT_MIDI)*100;
-    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.15,ctx.currentTime+0.4);
+    var g=ctx.createGain(); g.gain.setValueAtTime(0,ctx.currentTime); g.gain.linearRampToValueAtTime(0.5,ctx.currentTime+0.4);
     src.connect(g); g.connect(dryGain); g.connect(convolver); src.start();
     droneNodes=[{src:src,g:g}]; btn.textContent='◉ Drone On'; btn.classList.add('on');
   }else{
@@ -573,7 +573,8 @@ function setVol(v){
   document.getElementById('nav-vol').textContent='Vol: '+v+'%';
   var p=v+'%';
   document.getElementById('vol').style.background='linear-gradient(to right,var(--accent) 0%,var(--accent) '+p+',var(--card2) '+p+')';
-  if(masterGain)masterGain.gain.value=v/100;
+  // Scale 0-100 → 0.0-1.5 so 80% slider = full loud, 100% = max
+  if(masterGain) masterGain.gain.value=(v/100)*1.5;
 }
 function setRev(v){
   document.getElementById('rev-big').innerHTML=v+'<sup>%</sup>';
@@ -956,7 +957,7 @@ function handleMidiMessage(event){
       var src=ctx.createBufferSource();src.buffer=sampleBuffer;src.loop=true;src.loopStart=0.3;src.loopEnd=sampleBuffer.duration;
       src.detune.value=(note-SAMPLE_ROOT_MIDI)*100+det;
       var g=ctx.createGain(),volScale=vel/127;
-      g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.22*volScale,ctx.currentTime+0.02);
+      g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(0.6*volScale,ctx.currentTime+0.02);
       var filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=4000;
       src.connect(filt);filt.connect(g);g.connect(dryGain);g.connect(convolver);convolver.connect(reverbGain);src.start();
       return{src:src,g:g};
