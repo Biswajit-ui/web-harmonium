@@ -37,21 +37,92 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:14px;}
-body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;position:relative;overflow-x:hidden;}
+
+/* ── DYNAMIC GRADIENT BACKGROUND ── */
+#gradient-canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  pointer-events:none;
+  opacity:1;
+}
+.light-mode #gradient-canvas{ opacity:0.55; }
+
+/* All content sits above the gradient */
+.topnav,.main,.footer,#recordings-section,.midi-overlay{position:relative;z-index:1;}
+.topnav{background:rgba(23,23,26,0.75)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,0.08)!important;}
+.light-mode .topnav{background:rgba(255,255,255,0.75)!important;}
+.kbd-card,.ctrl-card{background:rgba(23,23,26,0.7)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.light-mode .kbd-card,.light-mode .ctrl-card{background:rgba(255,255,255,0.7)!important;}
+.rec-item{background:rgba(23,23,26,0.7)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.light-mode .rec-item{background:rgba(255,255,255,0.7)!important;}
 
 /* LOAD SCREEN */
-#load-screen{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
-.load-badge{width:78px;height:78px;background:linear-gradient(135deg,#2a2a30,#1a1a1f);border:1px solid var(--line);border-radius:22px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+#load-screen{
+  position:fixed;inset:0;z-index:300;
+  /* transparent — gradient canvas shows through */
+  background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+}
+/* frosted glass card wrapping all load content */
+.load-card{
+  display:flex;flex-direction:column;align-items:center;gap:22px;
+  padding:48px 52px 40px;
+  background:rgba(15,15,17,0.55);
+  backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,166,35,0.06);
+  animation:loadCardIn 0.7s cubic-bezier(0.34,1.3,0.64,1) both;
+}
+.light-mode .load-card{
+  background:rgba(255,255,255,0.55);
+  border-color:rgba(0,0,0,0.08);
+  box-shadow:0 24px 80px rgba(0,0,0,0.15);
+}
+@keyframes loadCardIn{
+  from{opacity:0;transform:translateY(24px) scale(0.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+/* pulsing glow ring around badge */
+.load-badge{
+  width:78px;height:78px;
+  background:linear-gradient(135deg,#2a2a30,#1a1a1f);
+  border:1px solid rgba(245,166,35,0.3);
+  border-radius:22px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-md), 0 0 32px rgba(245,166,35,0.15);
+  position:relative;overflow:hidden;
+  animation:badgePulse 2.8s ease-in-out infinite;
+}
+@keyframes badgePulse{
+  0%,100%{box-shadow:var(--shadow-md),0 0 20px rgba(245,166,35,0.1);}
+  50%{box-shadow:var(--shadow-md),0 0 50px rgba(245,166,35,0.35);}
+}
 .load-badge::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-bg),transparent);}
 .load-badge svg{width:34px;height:34px;position:relative;z-index:1;}
 .load-text{text-align:center;}
 .load-text h2{font-size:2.2rem;font-weight:800;letter-spacing:-0.03em;color:var(--ink);line-height:1.1;}
 .load-text h2 span{color:var(--accent);}
-.load-text p{font-size:0.95rem;color:var(--ink3);margin-top:5px;}
-#load-btn{background:var(--accent);color:#0f0f11;border:none;padding:13px 42px;border-radius:40px;font-size:1rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0.02em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(245,166,35,0.3);}
-#load-btn:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 28px rgba(245,166,35,0.45);}
-#load-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-#load-status{font-size:0.75rem;color:var(--ink3);min-height:18px;text-align:center;letter-spacing:0.04em;}
+.load-text p{font-size:0.85rem;color:var(--ink3);margin-top:6px;}
+#load-btn{
+  background:var(--accent);color:#0f0f11;border:none;
+  padding:13px 42px;border-radius:40px;
+  font-size:0.9rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;
+  letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 24px rgba(245,166,35,0.4), 0 0 0 0 rgba(245,166,35,0.4);
+  animation:btnGlow 2s ease-in-out infinite;
+}
+@keyframes btnGlow{
+  0%,100%{box-shadow:0 4px 24px rgba(245,166,35,0.3);}
+  50%{box-shadow:0 4px 40px rgba(245,166,35,0.6), 0 0 60px rgba(245,166,35,0.15);}
+}
+#load-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(245,166,35,0.55);}
+#load-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;animation:none;}
+#load-status{font-size:0.72rem;color:var(--ink3);min-height:18px;text-align:center;letter-spacing:0.06em;}
 
 /* TOPNAV */
 .topnav{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:10;flex-wrap:wrap;}
@@ -216,23 +287,28 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 3px var(--accent-
 </head>
 <body>
 
+<!-- DYNAMIC GRADIENT CANVAS -->
+<canvas id="gradient-canvas"></canvas>
+
 <!-- LOAD SCREEN -->
 <div id="load-screen">
-  <div class="load-badge">
-    <svg viewBox="0 0 24 24" fill="none">
-      <rect x="2"  y="10" width="2.2" height="8"  rx="1.1" fill="#f5a623"/>
-      <rect x="5.9"y="7"  width="2.2" height="11" rx="1.1" fill="#f5a623"/>
-      <rect x="9.9"y="4"  width="2.2" height="14" rx="1.1" fill="#f5a623" opacity="0.9"/>
-      <rect x="13.9"y="7" width="2.2" height="11" rx="1.1" fill="#f5a623" opacity="0.7"/>
-      <rect x="17.8"y="10"width="2.2" height="8"  rx="1.1" fill="#f5a623" opacity="0.5"/>
-    </svg>
+  <div class="load-card">
+    <div class="load-badge">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2"  y="10" width="2.2" height="8"  rx="1.1" fill="#f5a623"/>
+        <rect x="5.9"y="7"  width="2.2" height="11" rx="1.1" fill="#f5a623"/>
+        <rect x="9.9"y="4"  width="2.2" height="14" rx="1.1" fill="#f5a623" opacity="0.9"/>
+        <rect x="13.9"y="7" width="2.2" height="11" rx="1.1" fill="#f5a623" opacity="0.7"/>
+        <rect x="17.8"y="10"width="2.2" height="8"  rx="1.1" fill="#f5a623" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="load-text">
+      <h2>Web <span>Harmonium</span></h2>
+      <p>by Biswajit Maji &nbsp;·&nbsp; Real harmonium sample engine</p>
+    </div>
+    <button id="load-btn" onclick="initAndLoad()">▶ &nbsp;Start Playing</button>
+    <div id="load-status"></div>
   </div>
-  <div class="load-text">
-    <h2>Web <span>Harmonium</span></h2>
-    <p>by Biswajit Maji &nbsp;·&nbsp; Real harmonium sample engine</p>
-  </div>
-  <button id="load-btn" onclick="initAndLoad()">▶ &nbsp;Start Playing</button>
-  <div id="load-status"></div>
 </div>
 
 <!-- TOPNAV -->
@@ -988,3 +1064,133 @@ function handleMidiMessage(event){
   }
 }
 </script>
+<script>
+/* ══════════════════════════════════════════
+   DYNAMIC MOVING GRADIENT BACKGROUND
+   — 6 soft colour orbs floating around,
+     reacting to note presses
+══════════════════════════════════════════ */
+(function(){
+  var canvas = document.getElementById('gradient-canvas');
+  var c = canvas.getContext('2d');
+  var W, H;
+  var isLight = false;
+
+  /* ── Orb definitions ── */
+  var orbs = [
+    // { x, y, vx, vy, r, hue, sat, lit, alpha }
+    { x:0.15, y:0.20, vx:0.00022, vy:0.00015, r:0.58, h:35,  s:92, l:56, a:0.32 },  // amber
+    { x:0.80, y:0.15, vx:-0.00017, vy:0.00024, r:0.50, h:200, s:82, l:52, a:0.22 }, // teal
+    { x:0.50, y:0.80, vx:0.00026, vy:-0.00019, r:0.55, h:270, s:72, l:52, a:0.20 }, // purple
+    { x:0.10, y:0.70, vx:0.00013, vy:-0.00028, r:0.44, h:15,  s:88, l:56, a:0.18 }, // orange-red
+    { x:0.90, y:0.60, vx:-0.00024, vy:0.00017, r:0.46, h:160, s:78, l:50, a:0.17 }, // green
+    { x:0.55, y:0.35, vx:-0.00015, vy:-0.00022, r:0.42, h:50, s:82, l:60, a:0.16 }  // yellow
+  ];
+
+  /* ── Beat pulse state ── */
+  var pulse = { scale: 1.0, target: 1.0, decay: 0.96 };
+
+  /* ── Detect if on load screen ── */
+  function isLoadScreen(){
+    var ls = document.getElementById('load-screen');
+    return ls && ls.style.display !== 'none';
+  }
+
+  /* ── Resize ── */
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ── Draw one frame ── */
+  function draw(ts){
+    requestAnimationFrame(draw);
+
+    isLight = document.body.classList.contains('light-mode');
+    var bg = isLight ? '#f0f0f4' : '#0f0f11';
+
+    /* clear */
+    c.clearRect(0, 0, W, H);
+    c.fillStyle = bg;
+    c.fillRect(0, 0, W, H);
+
+    /* pulse lerp */
+    pulse.scale += (pulse.target - pulse.scale) * 0.08;
+    pulse.target = 1.0 + (pulse.target - 1.0) * pulse.decay;
+    if(pulse.target < 1.001) pulse.target = 1.0;
+
+    /* draw orbs */
+    orbs.forEach(function(o){
+      /* move */
+      o.x += o.vx;
+      o.y += o.vy;
+      /* bounce */
+      if(o.x < -0.1) { o.x = -0.1; o.vx *= -1; }
+      if(o.x >  1.1) { o.x =  1.1; o.vx *= -1; }
+      if(o.y < -0.1) { o.y = -0.1; o.vy *= -1; }
+      if(o.y >  1.1) { o.y =  1.1; o.vy *= -1; }
+
+      var cx = o.x * W;
+      var cy = o.y * H;
+      var radius = o.r * Math.max(W, H) * pulse.scale;
+
+      var lit = isLight ? Math.min(o.l + 15, 75) : o.l;
+      /* on load screen: boost alpha for more vivid gradient */
+      var alphaBoost = isLoadScreen() ? 1.6 : 1.0;
+      var alpha = (isLight ? o.a * 0.7 : o.a) * alphaBoost;
+
+      var grad = c.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      grad.addColorStop(0,   'hsla('+o.h+','+o.s+'%,'+lit+'%,'+alpha+')');
+      grad.addColorStop(0.5, 'hsla('+o.h+','+o.s+'%,'+lit+'%,'+(alpha*0.4)+')');
+      grad.addColorStop(1,   'hsla('+o.h+','+o.s+'%,'+lit+'%,0)');
+
+      c.fillStyle = grad;
+      c.beginPath();
+      c.ellipse(cx, cy, radius, radius * 0.75, ts * 0.0001 + o.h * 0.01, 0, Math.PI * 2);
+      c.fill();
+    });
+
+    /* subtle scanline noise overlay for dark mode */
+    if(!isLight){
+      var noiseAlpha = 0.018;
+      for(var y = 0; y < H; y += 3){
+        if(Math.random() > 0.7){
+          c.fillStyle = 'rgba(255,255,255,'+(Math.random()*noiseAlpha)+')';
+          c.fillRect(0, y, W, 1);
+        }
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+
+  /* ── React to note presses — pulse the gradient ── */
+  var _origStartNote = window.startNote;
+  // We hook into the DOM keydown & mouse events instead (safe)
+  document.addEventListener('mousedown', function(e){
+    if(e.target.classList.contains('wk') || e.target.classList.contains('bk')){
+      triggerPulse(e.target.classList.contains('bk'));
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if(!e.repeat) triggerPulse(false);
+  });
+
+  function triggerPulse(isBlack){
+    pulse.target = isBlack ? 1.12 : 1.07;
+    /* shift the active orb hue slightly for colour variation */
+    orbs[0].h = (orbs[0].h + (isBlack ? 8 : 4)) % 360;
+  }
+
+  /* ── Also react when theme toggles ── */
+  var _origToggle = window.toggleTheme;
+  window.toggleTheme = function(){
+    if(_origToggle) _origToggle();
+    pulse.target = 1.15;
+  };
+
+})();
+</script>
+</body>
+</html>
